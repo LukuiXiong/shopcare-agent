@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShopCare · 售后助手</title>
+  <style>
+    /* 使用系统字体和响应式布局，不依赖外部资源 */
+    :root { color-scheme: light; font-family: "Microsoft YaHei", system-ui, sans-serif; color: #233c35; background: #f4f6f2; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid #d6a647; outline-offset: 3px; }
+    .shell { max-width: 920px; margin: auto; padding: 30px 24px 18px; height: 100dvh; display: flex; flex-direction: column; gap: 18px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { font-size: 13px; letter-spacing: 2px; font-weight: 700; color: #577368; }
+    h1 { font-size: 25px; margin: 6px 0; }
+    .badge { font-size: 12px; border: 1px solid #cbd8ca; border-radius: 20px; padding: 7px 12px; white-space: nowrap; }
+    .intro { margin: 0; font-size: 13px; color: #65746e; line-height: 1.7; }
+    main { min-height: 0; flex: 1; background: #fff; border: 1px solid #dde4da; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 12px 38px #203e3008; }
+    .messages { overflow-y: auto; flex: 1; min-height: 100px; padding: 24px; }
+    .welcome { padding: 20px 0; }
+    .welcome h2 { font-size: 23px; margin: 0 0 10px; }
+    .welcome p { color: #708077; font-size: 14px; line-height: 1.8; }
+    .examples { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+    .example { text-align: left; border: 1px solid #e1e6dd; border-radius: 12px; padding: 14px; color: #365449; background: #f8faf6; font-size: 13px; line-height: 1.6; }
+    .example:hover { background: #eef3e8; border-color: #aebfa5; }
+    .message { margin: 0 0 22px; }
+    .label { font-size: 12px; color: #718078; margin-bottom: 7px; }
+    .bubble { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; font-size: 14px; padding: 13px 17px; border-radius: 14px; background: #f1f5ed; width: fit-content; max-width: 95%; }
+    .user { display: flex; flex-direction: column; align-items: flex-end; }
+    .user .bubble { background: #245a47; color: #fff; }
+    .error .bubble { background: #fff1e8; color: #874426; }
+    /* Markdown 已有段落结构，取消纯文本换行，避免列表和表格间距过大 */
+    .bubble.markdown { white-space: normal; min-width: 0; }
+    .markdown > :first-child { margin-top: 0; }
+    .markdown > :last-child { margin-bottom: 0; }
+    .markdown p, .markdown ul, .markdown ol, .markdown blockquote, .markdown pre { margin: 0 0 12px; }
+    .markdown h1, .markdown h2, .markdown h3, .markdown h4 { font-size: 16px; line-height: 1.6; margin: 18px 0 8px; }
+    .markdown ul, .markdown ol { padding-left: 24px; }
+    .markdown li { margin: 4px 0; }
+    .markdown li > p { margin: 4px 0; }
+    .markdown strong { font-weight: 700; }
+    .markdown code { font-family: Consolas, monospace; font-size: .92em; background: #e4ebdf; padding: 2px 5px; border-radius: 4px; }
+    .markdown pre { overflow-x: auto; max-width: 100%; background: #e4ebdf; padding: 12px; border-radius: 8px; }
+    .markdown pre code { padding: 0; white-space: pre; }
+    .markdown blockquote { border-left: 3px solid #aabb9e; padding-left: 12px; color: #63735f; }
+    .markdown table { display: block; overflow-x: auto; max-width: 100%; border-collapse: collapse; margin: 12px 0; }
+    .markdown th, .markdown td { border: 1px solid #cdd8c7; padding: 8px 12px; text-align: left; min-width: 85px; }
+    .markdown th { background: #e4ebdf; }
+    .markdown hr { border: 0; border-top: 1px solid #cdd8c7; margin: 16px 0; }
+    .composer { border-top: 1px solid #e6eade; padding: 16px 20px; background: #fcfdfb; }
+    label { font-size: 12px; color: #607369; }
+    textarea { display: block; width: 100%; resize: vertical; min-height: 65px; max-height: 180px; padding: 10px 0; border: 0; background: transparent; color: #233c35; line-height: 1.6; }
+    .actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    .status { flex: 1; font-size: 12px; color: #68786d; }
+    .send { background: #245a47; color: white; border: none; padding: 10px 22px; border-radius: 9px; }
+    .clear { border: 0; background: transparent; color: #6c7c72; padding: 8px; font-size: 12px; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    footer { display: flex; justify-content: space-between; gap: 12px; color: #78857b; font-size: 12px; line-height: 1.6; }
+    a { color: #456a58; }
+    @media (max-width: 600px) { .shell { padding: 18px 12px 12px; gap: 12px; } .messages { padding: 17px; } .examples { grid-template-columns: 1fr; } h1 { font-size: 21px; } .composer { padding: 12px; } footer { flex-direction: column; gap: 3px; } }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header><div><div class="brand">SHOPCARE</div><h1>售后助手</h1></div></header>
+  <p class="intro">查订单、了解发货规则，或登记本地催发货工单。同一对话可连续追问，历史会自动保存。</p>
+  <div style="display:flex;gap:12px;align-items:center"><label for="history">历史对话</label><select id="history" style="min-width:0;flex:1;max-width:100%;padding:8px" aria-label="历史对话"></select></div>
+  <main>
+    <div id="messages" class="messages" role="log" aria-label="聊天记录" aria-live="polite">
+      <section class="welcome" id="welcome">
+        <h2>今天需要什么帮助？</h2>
+        <p>从一个订单开始，试试下面的问题。点击示例后，再确认发送。</p>
+        <div class="examples">
+          <button class="example" type="button">查询 ORD1002 的订单状态</button>
+          <button class="example" type="button">ORD1002 是否超过发货时限？</button>
+          <button class="example" type="button">ORD1002 超时的话帮我登记催发货</button>
+          <button class="example" type="button">查询 ORD1002 的催发货工单</button>
+        </div>
+      </section>
+    </div>
+    <form id="form" class="composer">
+      <label for="input">你的问题</label>
+      <textarea id="input" maxlength="2000" required placeholder="例如：查询 ORD1002 的催发货进度" aria-describedby="status"></textarea>
+      <div class="actions"><span id="status" class="status" role="status">Enter 发送 · Shift + Enter 换行</span><button id="clear" class="clear" type="button">新建对话</button><button id="send" class="send" type="submit" disabled>发送 ↗</button></div>
+    </form>
+  </main>
+  <footer><span>聊天保存在本机；新建对话会保留历史和工单。</span><a href="/docs" target="_blank" rel="noopener">接口文档 ↗</a></footer>
+</div>
+<!-- 本地固定版本资源：页面运行时不依赖外部 CDN -->
+<script src="/static/vendor/marked.umd.js"></script>
+<script src="/static/vendor/purify.min.js"></script>
+<script>
+  // 服务端保存正文；浏览器仅记录当前会话编号。
+  const form = document.querySelector('#form');
+  const input = document.querySelector('#input');
+  const send = document.querySelector('#send');
+  const clear = document.querySelector('#clear');
+  const messages = document.querySelector('#messages');
+  const welcome = document.querySelector('#welcome');
+  const status = document.querySelector('#status');
+  const hint = 'Enter 发送 · Shift + Enter 换行';
+  let busy = false;
+  let conversationId = null;
+  const history = document.querySelector('#history');
+  function remember(id) {
+    conversationId = id;
+    try {
+      if (id) localStorage.setItem('shopcare.conversation', id);
+      else localStorage.removeItem('shopcare.conversation');
+    } catch (_) {}
+  }
+  async function api(url, options) {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    if (!response.ok) {
+      const error = new Error(typeof data.detail === 'string' ? data.detail : '请求失败');
+      error.status = response.status; throw error;
+    }
+    return data;
+  }
+  async function refreshHistory() {
+    const rows = await api('/conversations');
+    history.replaceChildren();
+    const draft = document.createElement('option');
+    draft.value = ''; draft.textContent = '新对话（尚未发送）';
+    history.append(draft);
+    rows.forEach(row => {
+      const option = document.createElement('option');
+      option.value = row.id;
+      option.textContent = row.title;
+      history.append(option);
+    });
+    history.value = conversationId || '';
+  }
+  async function loadConversation(id) {
+    const data = await api('/conversations/' + encodeURIComponent(id));
+    remember(data.id);
+    messages.querySelectorAll('.message').forEach(item => item.remove());
+    welcome.hidden = data.messages.length > 0;
+    data.messages.forEach(msg => addMessage(msg.role, msg.text));
+    input.value = '';
+  }
+  async function manageConversation(id = null) {
+    if (busy) return;
+    busy = true; input.disabled = true; clear.disabled = true; history.disabled = true; updateSend();
+    try {
+      if (id) {
+        try { await loadConversation(id); }
+        catch (error) { if (error.status !== 404) throw error; id = null; }
+      }
+      if (!id) {
+        // 空白对话只存在于页面，首次发送才由 /chat 创建数据库记录。
+        remember(null);
+        messages.querySelectorAll('.message').forEach(item => item.remove());
+        welcome.hidden = false;
+        input.value = '';
+      }
+      await refreshHistory();
+      status.textContent = hint;
+    } catch (error) {
+      status.textContent = '加载失败：' + error.message + '。可点击新建对话重新开始。';
+    } finally {
+      busy = false; input.disabled = false; clear.disabled = false; history.disabled = false; updateSend();
+    }
+  }
+  history.addEventListener('change', () => manageConversation(history.value));
+
+  function updateSend() { send.disabled = busy || !input.value.trim(); }
+  function addMessage(role, text) {
+    const item = document.createElement('div');
+    item.className = 'message ' + role;
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = role === 'user' ? '你' : role === 'error' ? '请求提示' : 'ShopCare';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    if (role === 'assistant' && window.marked && window.DOMPurify) {
+      // 先解析 Markdown，再用白名单过滤；不允许脚本、图片、表单或事件属性。
+      const html = marked.parse(text, { gfm: true, breaks: true, async: false });
+      bubble.innerHTML = DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'del', 'ul', 'ol', 'li',
+          'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre', 'code',
+          'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'a'],
+        ALLOWED_ATTR: ['href', 'title', 'start'],
+        ALLOW_DATA_ATTR: false, ALLOW_ARIA_ATTR: false
+      });
+      bubble.classList.add('markdown');
+    } else {
+      // 用户、错误提示和库加载失败时均安全回退为纯文本。
+      bubble.textContent = text;
+    }
+    item.append(label, bubble);
+    messages.append(item);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  document.querySelectorAll('.example').forEach(button => {
+    button.addEventListener('click', () => {
+      if (busy) return;
+      input.value = button.textContent;
+      updateSend();
+      input.focus();
+    });
+  });
+  input.addEventListener('input', updateSend);
+  input.addEventListener('keydown', event => {
+    // 中文输入法选词期间不能用 Enter 误发送。
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
+      event.preventDefault();
+      if (!send.disabled) form.requestSubmit();
+    }
+  });
+  clear.addEventListener('click', () => manageConversation());
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const message = input.value.trim();
+    if (busy || !message) return;
+    busy = true;
+    input.disabled = true;
+    clear.disabled = true;
+    history.disabled = true;
+    updateSend();
+    welcome.hidden = true;
+    addMessage('user', message);
+    input.value = '';
+    status.textContent = '正在处理，请稍候…';
+    send.textContent = '处理中…';
+    try {
+      // 同源调用现有接口；不自动重试，避免重复提交登记请求。
+      const response = await fetch('/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, conversation_id: conversationId })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : '请求失败，请稍后再试。');
+      if (typeof data.reply !== 'string') throw new Error('服务器返回格式异常。');
+      remember(data.conversation_id);
+      addMessage('assistant', data.reply);
+      await refreshHistory();
+      status.textContent = hint;
+    } catch (error) {
+      addMessage('error', '未能获取回答。' + error.message + '\n如刚才申请了登记，请先查询工单，确认结果后再决定是否重试。');
+      status.textContent = '请求未完成，请检查服务连接。';
+      input.value = message;
+    } finally {
+      busy = false;
+      input.disabled = false;
+      clear.disabled = false;
+      history.disabled = false;
+      send.textContent = '发送 ↗';
+      updateSend();
+      input.focus();
+    }
+  });
+  // 初始化期间禁用发送，防止历史恢复前串到其他会话。
+  let savedId = null;
+  try { savedId = localStorage.getItem('shopcare.conversation'); } catch (_) {}
+  manageConversation(savedId);
+</script>
+</body>
+</html>

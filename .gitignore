@@ -1,0 +1,16 @@
+# 不提交本地密钥、虚拟环境和 Python 缓存
+.env
+.env.*
+# 上下文文档与所有环境文件仅保留在本机
+CONTEXT*.md
+**/*HANDOFF*.md
+.idea/
+.vscode/
+*.sqlite3
+*.sqlite3-*
+*.db
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+data/
