@@ -11,7 +11,7 @@
 ```powershell
 # 安装锁定版本的依赖
 uv sync --locked
-# 自行创建本地 .env，填写 MODEL_NAME 和 DEEPSEEK_API_KEY，不要提交密钥
+# 自行创建本地 .env，填写 MODEL_NAME 和 DEEPSEEK_API_KEY
 # 首次启动前准备本地 embedding 模型和检索索引
 uv run python -m scripts.build_index
 # 启动服务，打开 http://127.0.0.1:8002/
